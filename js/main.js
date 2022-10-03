@@ -6,7 +6,7 @@ const btnLogin = document.querySelector("#login") || "not found";
 const urlUser =  "http://localhost:8080/api/v1/Authenticate/Login"
 const username = document.querySelector("#username")
 const password = document.querySelector("#password")
-const linkMenuM = document.querySelector("#linkMenuMovil") || "not found"; //** link */
+const linkMenuM = document.querySelectorAll(".linkMenuMovil") || "not found"; //** link */
 
 async function testFuncion(urlUser,datosUser){
     await fetch(urlUser,{
@@ -31,17 +31,17 @@ async function testFuncion(urlUser,datosUser){
             username.placeholder="las contraseñas no conciden";
             password.classList.toggle('error-input-movil')
             password.placeholder="las contraseñas no conciden";
+            alert("los datos con coinciden")
         }
 
     })
     .catch((err) => console.log(err))
 }
 
-
 if(linkMenuM != "not found"){
 
-    linkMenuM.addEventListener("click",()=>{
-        fondoMenu.classList.toggle('mostrarf')
+    linkMenuM.forEach(element=>{
+        element.addEventListener("click",()=>{fondoMenu.classList.toggle('mostrarf')})      
     })
 }
 
