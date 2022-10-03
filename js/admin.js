@@ -3,6 +3,9 @@ const linkCerrarSesion = document.querySelector("#linkCerrarSesion")
 
 const urlListaPlantas = "http://localhost:8080/api/v1/Plant/Plants"
 const urlIdUsuario= "http://localhost:8080/api/v1/User/UserByUsername/"+localStorage.getItem('userName')
+const urlAddPlanta = "http://localhost:8080/api/v1/Process/AddProcess"
+const urlEliminarPlanta ="http://localhost:8080/api/v1/Process/DeleteProcess/"
+
 
 const btnPlantaEstadoSelecionadaOpciones = document.querySelector(".planta_estado_selecionada_opciones")
 const btnPlantaEstadoSelecionadaVer = document.querySelector(".planta_estado_selecionada_ver")
@@ -15,6 +18,12 @@ const modalAgregarPlantaContenedorPlantas = document.querySelector('.modal_agreg
 const plantaEstadoSelecionadaActual  = document.querySelector('.planta_estado_selecionada_actual_slider')
 const plantaSelecionada = document.querySelector('.planta_selecionada_slider')
 const plantaTips = document.querySelector('.planta_tips_contenedor_parrafos_slider')
+const modalEliminarPlanta = document.querySelector('.modal_eliminar_planta')
+const btnModalEliminarPlantaConfirmar = document.querySelector('.modal_eliminar_planta_botones_eliminar')
+const btnModalEliminarPlantaCancelar = document.querySelector('.modal_recomendado_botones_cancelar')
+const modalElimnarPlantasContenedor = document.querySelector('.modal_eliminar_plantacontenedor_plantas')
+const btnModalElimarPlanta = document.querySelector(".planta_estado_selecionada_quitar")
+
 /* const tituloPlantaSelecionada = document.querySelector(".planta_selecionada_titulo")
 const parrafoPlantaSelecionada = document.querySelector(".planta_selecionada_parrafo")
  */
@@ -22,18 +31,124 @@ const parrafoPlantaSelecionada = document.querySelector(".planta_selecionada_par
 const bntModalAgregarPlantaConfirmar = document.querySelector("#modal_agregar_planta_btn_confirmar")
 let plantas
 let idUsuario
+let plantasUsuarioComparar
 
 
-bntModalAgregarPlantaConfirmar.addEventListener("click",()=>{
+/* async function eliminarPlanta(){
+    await fetch(url,)
+}
+ */
 
-    let todosLosElementos = document.querySelectorAll(".modal_agregar_planta_escojida")
-    plantasAgregar = new Array()
-    todosLosElementos.forEach((element)=>{
-        if(element.checked){
-            plantasAgregar.push(elemnt.value)
-            console.log(plantasAgregar)
+async function eliminarElemnto(url){
+    await fetch(url,{
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        }
+    }).then((response) => response.json())
+    .then((data7)=>{
+        console.log("eliminando")
+    })
+    .catch((err) => console.log(err))
+
+}
+
+
+
+async function listaEliminarPlanta(){
+   
+    await fetch("http://localhost:8080/api/v1/Process/ProcessesByUser/"+localStorage.getItem('userId'),{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
         }
     })
+    .then((response) => response.json())
+    .then((data7)=>{
+        console.log(data7)
+        ciclo = data7.data.processes
+
+        templateE=""
+        ciclo.forEach((element)=>{
+            templateE += `
+            <div class="modal_agregar_plantacontenedor_planta">
+                <img id="rImagen${element.plant.id}" class="modal_agregar_planta_imagen" src="https://loremflickr.com/320/240/dog" alt="">
+                <label class="modal_agregar_planta_texto">${element.plant.name}</label>
+                <button  class="btn-emilar-d" name="" id="${element.id}" value="${element.id}">X</button>
+            </div>
+        `
+        })
+        
+        modalElimnarPlantasContenedor.innerHTML = templateE 
+
+        ciclo.forEach((element)=>{
+            imagenp=document.querySelector('#rImagen'+element.plant.id)
+            imagenp.src="../images/admin/plantas/"+element.plant.id+".png"
+
+            /* element.addEventListener('click',()=>{
+                console.log("le diste al elemento "+element.id)
+            }) */
+        })
+
+        botonesEliminar = document.querySelectorAll(".btn-emilar-d")
+        botonesEliminar.forEach((element)=>{
+            element.addEventListener('click',()=>{
+                element.parentNode.classList.add('nomostrar')
+                eliminarElemnto(urlEliminarPlanta+element.id)
+            })
+        })
+
+    })
+    
+
+}
+
+listaEliminarPlanta()
+
+
+btnModalElimarPlanta.addEventListener("click",()=>{
+    modalEliminarPlanta.classList.toggle('mostrarf')
+    window.scrollTo(0,0)
+    window.onscroll = () => { window.scroll(0, 0); };
+})
+btnModalEliminarPlantaCancelar.addEventListener("click",()=>{
+    window.onscroll = "";
+    modalEliminarPlanta.classList.toggle('mostrarf')
+})
+
+async function agregarPlanta(url,idPlanta){
+
+    userId=localStorage.getItem('userId')
+    plantId=idPlanta
+
+    datosUser = {
+        plantId : plantId,
+        userId :  userId
+    }
+    
+    
+    await fetch(url,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(datosUser)   
+    })
+    .then((response) => response.json())
+    .then((data4)=>{
+        if(data4.data==true){
+            alert("planta agregada con exito! actuliza la pagina para ver los cambios")
+        }
+        
+    })
+    .catch((err) => console.log(err))
+}
+
+bntModalAgregarPlantaConfirmar.addEventListener("click",()=>{
+    window.location.href="admin.html";
 })
 
 
@@ -85,6 +200,29 @@ btnPlantaEstadoSelecionadaOpciones.addEventListener("click",()=>{
 
 })
 
+async function plantasConsultar(url){
+    await fetch(url,{
+        method:'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        }
+
+    })
+    .then((response) => response.json())
+    .then((data5)=>{
+        data5.data.processes.map((element)=>{
+            /* console.log(element.plant.id)
+            document.querySelector("#plant1"+element.plant.id).classList.add("nomostrar") */
+            console.log(element.plant.id)
+            test = document.querySelector("#plant"+element.plant.id)
+            test.classList.add("nomostrar")
+        })
+    })
+    .catch((err) => console.log(err))
+}
+
+
 
 async function plantaUsuario(url){
     await fetch(url,{
@@ -97,8 +235,8 @@ async function plantaUsuario(url){
     .then((response) => response.json())
     .then((data3)=>{
         infoUsuarioPlanta = data3.data.processes
-        console.log(data3.data.processes)
-        
+
+        localStorage.setItem("userId",data3.data.id)
         infoUsuarioPlanta.forEach(element=>{
             if(element.germination==true){
                 console.log("tenemos  uno")
@@ -140,7 +278,7 @@ async function plantaUsuario(url){
             if(element.harvest==true){
                 pasosPlanta.push("​​cosecha")
             }
-            console.log(pasosPlanta)
+            
 
             graficoPlanta=""
 
@@ -192,7 +330,8 @@ async function plantasUsuario(){
     .then((data2)=>{
         idUsuario = data2.data.id
         let urlPlantasUsuario = "http://localhost:8080/api/v1/Process/ProcessesByUser/"+idUsuario
-        console.log(urlPlantasUsuario)
+       /*  console.log(urlPlantasUsuario) */
+      
         plantaUsuario(urlPlantasUsuario)
         
     })
@@ -203,6 +342,10 @@ async function plantasUsuario(){
 }
 
 plantasUsuario()
+
+
+
+
 
 
 
@@ -219,18 +362,32 @@ async function listaPlantas(){
     .then((data)=> {
        
         plantas = data.data
-      
+        console.log(data.data)
         template = ""
         plantas.forEach(element => {
-            template +=  `<div class="modal_agregar_plantacontenedor_planta">
-                <img class="modal_agregar_planta_imagen" src="https://loremflickr.com/320/240/dog" alt="">
+            template +=  `<div id="plant${element['id']}" class="modal_agregar_plantacontenedor_planta">
+                <img class="modal_agregar_planta_imagen" src="../images/admin/plantas/${element['id']}.png" alt="">
                 <label class="modal_agregar_planta_texto">${element['name']}</label>
-                <input class="modal_agregar_planta_escojida" type="checkbox" name="" id="" value="${element['id']}">
+                <button class="modal_agregar_planta_escojida" type="button" value="${element['id']}">+</button>
             </div>`
         });
 
-
         modalAgregarPlantaContenedorPlantas.innerHTML = template
+
+        let plantaParaAgregar = document.querySelectorAll('.modal_agregar_planta_escojida')
+        plantaParaAgregar.forEach((element)=>{
+            element.addEventListener("click", ()=>{
+                console.log(`diste click en el ${element.value}`)
+                element.parentNode.classList.add('nomostrar')
+                agregarPlanta(urlAddPlanta,element.value)
+                
+            }) 
+           
+        })
+
+         
+        plantasConsultar( "http://localhost:8080/api/v1/Process/ProcessesByUser/"+localStorage.getItem('userId'))
+
         /* modalAgregarPlantaContenedorPlantas.innerHTML =;   */
     })
     .catch((err) => console.log(err))
